@@ -84,21 +84,23 @@ name: Build, Test, and Push Backend Docker Image
 
 on:
   push:
-    branches: [ test-cicd-backend ]
+    branches:
+      - test-cicd-backend
 
 jobs:
   build-test-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out the repository
+      - name: Check out repository
         uses: actions/checkout@v4
 
-      # Step 1: Securely recreate your .env file from your GitHub Secret on the runner
-      - name: Create .env file for database tests
+      # Create .env file from GitHub Secret
+      - name: Create .env file
         run: |
-          echo "${{ secrets.ENV_FILE_RDDS }}" > .env
+          echo "${{ secrets.ENV_FILE }}" > .env
 
+      # Configure AWS Credentials
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -106,23 +108,32 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_TEST_SECRETS_KEYS }}
           aws-region: ${{ secrets.REGION }}
 
-      - name: Login to ECR
+      # Login to Amazon ECR
+      - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Step 2: Load the .env variables into the runner environment, run tests, and package
+      # Build and test Spring Boot application
       - name: Run Backend Integration Tests and Package
+        shell: bash
         run: |
-          # This reads your generated .env file and exports every variable into the GitHub Actions runner environment
-          export $(cat .env | xargs)
+          set -a
+          source .env
+          set +a
+
+          echo "DB_HOST=$DB_HOST"
+          echo "DB_PORT=$DB_PORT"
+          echo "DB_NAME=$DB_NAME"
+          echo "DB_USERNAME=$DB_USERNAME"
+
           mvn clean package
 
-      # Step 3: Build the Docker image
+      # Build Docker image
       - name: Docker build
         run: |
           docker build -t backend-test:latest .
 
-      # Step 4: Tag the Docker image with the run number and 'latest'
+      # Tag Docker image
       - name: Docker tag
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -130,7 +141,7 @@ jobs:
           docker tag backend-test:latest $ECR_REGISTRY/backend-test:${{ github.run_number }}
           docker tag backend-test:latest $ECR_REGISTRY/backend-test:latest
 
-      # Step 5: Push both tags to your AWS ECR Repository
+      # Push Docker image to ECR
       - name: Docker push
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
