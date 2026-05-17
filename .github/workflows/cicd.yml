@@ -80,7 +80,7 @@
 #          git commit -m "Update backendapi image to version ${{ env.IMAGE_TAG }}"
 #          git push origin main
         
-name: Build, Test, and Push Backend Docker Image
+name: Build-Test-push
 
 on:
   push:
