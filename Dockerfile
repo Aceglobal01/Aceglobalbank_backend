@@ -1,20 +1,34 @@
-# Use the khipu/openjdk17-alpine base image
-FROM khipu/openjdk17-alpine
+# # Use the khipu/openjdk17-alpine base image
+# FROM khipu/openjdk17-alpine
 
-# Set the working directory inside the container.
+# # Set the working directory inside the container.
+# WORKDIR /app
+
+# # Copy the pom.xml and any other necessary files for building the application
+# COPY pom.xml /app/pom.xml
+
+# # Copy the source code into the container
+# COPY src /app/src
+
+# # Install Maven (if not already included in the base image)
+# RUN apk add --no-cache maven
+
+# # Package the application using Maven
+# RUN mvn clean package -DskipTests
+
+# # Run the application
+# CMD ["java", "-jar", "target/online-banking-system-0.0.1-SNAPSHOT.jar"]
+# Use a lightweight OpenJDK runtime for the final container
+FROM eclipse-temurin:17-jre-alpine
+
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the pom.xml and any other necessary files for building the application
-COPY pom.xml /app/pom.xml
+# Copy the compiled .jar file directly from the GitHub runner target directory
+COPY target/online-banking-system-0.0.1-SNAPSHOT.jar app.jar
 
-# Copy the source code into the container
-COPY src /app/src
-
-# Install Maven (if not already included in the base image)
-RUN apk add --no-cache maven
-
-# Package the application using Maven
-RUN mvn clean package -DskipTests
+# Expose the port your Spring Boot app runs on
+EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "target/online-banking-system-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
