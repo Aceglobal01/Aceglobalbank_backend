@@ -110,11 +110,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # Step 2: Run backend tests AND package the application into a .jar file
+      # Step 2: Load the .env variables into the runner environment, run tests, and package
       - name: Run Backend Integration Tests and Package
-        env:
-          ENV_FILE_RDS: ${{ secrets.ENV_FILE_RDDS }}
         run: |
+          # This reads your generated .env file and exports every variable into the GitHub Actions runner environment
+          export $(cat .env | xargs)
           mvn clean package
 
       # Step 3: Build the Docker image
