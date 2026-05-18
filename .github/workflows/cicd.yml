@@ -57,6 +57,7 @@ jobs:
       with:
         # Match the exact repo name
         repository: Aceglobal01/Aceglobalbank_kubernetis_Manifest
+        ref: Dev-Branch
         token: ${{ secrets.GIT_PASSWORD }}
         path: Aceglobalbank_kubernetis_Manifest
 
