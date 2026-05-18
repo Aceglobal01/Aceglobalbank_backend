@@ -62,7 +62,7 @@ jobs:
         # Match the exact repo name
         repository: Aceglobal01/Aceglobalbank_kubernetis_Manifest
         token: ${{ secrets.GIT_PASSWORD }}
-        path: k8mainfest
+        path: Aceglobalbank_kubernetis_Manifest
 
     - name: Update Kubernetes Manifest
       run: |
