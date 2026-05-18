@@ -273,7 +273,7 @@ jobs:
         DB_PORT: 3306
         DB_NAME: online_banking
         DB_USERNAME: admin
-        DB_PASSWORD: AceGlobalSecure2026 # Use your fresh updated password here
+        DB_PASSWORD: AceglobalDigitals # Use your fresh updated password here
       run: |
         mvn clean package
 
