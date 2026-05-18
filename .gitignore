@@ -34,3 +34,6 @@ build/
 
 
 backend-key
+
+.application.properties
+.env/
