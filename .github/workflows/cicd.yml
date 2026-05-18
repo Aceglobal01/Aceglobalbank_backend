@@ -153,6 +153,79 @@
 #         docker rmi $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} || true
 #         docker rmi $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:latest || true
 
+# name: Bank Backend Pipeline
+
+# on:
+#   push:
+#     branches:
+#       - test-cicd-backend
+
+# jobs:
+#   Continues-Integration_build_and_push:
+#     runs-on: ubuntu-latest
+#     env:
+#       ECR_REPOSITORY: backend-test
+#       IMAGE_TAG: ${{ github.run_number }}
+
+#     steps:
+#     - name: Checkout repository
+#       uses: actions/checkout@v4
+
+#     - name: Set up Docker Buildx
+#       uses: docker/setup-buildx-action@v3
+
+#     # 1. Create .env file from YOUR custom GitHub Secret
+#     - name: Create .env file
+#       run: |
+#         echo "${{ secrets.MY_ENV_FILE }}" > .env
+
+#     # 2. Configure AWS credentials using YOUR specific secret names
+#     - name: Configure AWS credentials
+#       uses: aws-actions/configure-aws-credentials@v4
+#       with:
+#         aws-access-key-id: ${{ secrets.MY_AWS_ACCESS_KEY_ID }}
+#         aws-secret-access-key: ${{ secrets.MY_AWS_SECRET_ACCESS_KEY }}
+#         aws-region: ${{ secrets.MY_AWS_REGION }}
+
+#     # 3. Log in to Amazon ECR (Dynamically captures your registry URI automatically)
+#     - name: Log in to Amazon ECR
+#       id: login-ecr
+#       uses: aws-actions/amazon-ecr-login@v2
+
+#     # 4. Run Spring Boot application package (skipping tests to bypass DB firewall block)
+#     - name: Run Backend Integration Tests and Package
+#       shell: bash
+#       run: |
+#         set -a
+#         source .env
+#         set +a
+#         mvn clean package 
+
+#     # 5. Build and Tag Docker images using the dynamic registry string
+#     - name: Build Docker image
+#       env:
+#         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#       run: |
+#         docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
+#         docker tag $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:latest
+  
+#     # 6. Push Docker images straight to your ECR Repository
+#     - name: Push Docker images to ECR
+#       env:
+#         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#       run: |
+#         docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+#         docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:latest
+
+#     # 7. Clean up Docker images locally on the dynamic cloud runner
+#     - name: Clean up Docker images locally
+#       if: always()
+#       env:
+#         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#       run: |
+#         docker rmi $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} || true
+#         docker rmi $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:latest || true
+
 name: Bank Backend Pipeline
 
 on:
@@ -187,19 +260,30 @@ jobs:
         aws-secret-access-key: ${{ secrets.MY_AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.MY_AWS_REGION }}
 
-    # 3. Log in to Amazon ECR (Dynamically captures your registry URI automatically)
+    # 3. Log in to Amazon ECR
     - name: Log in to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    # 4. Run Spring Boot application package (skipping tests to bypass DB firewall block)
+    # 4. Run Spring Boot application integration tests and package safely
     - name: Run Backend Integration Tests and Package
       shell: bash
       run: |
-        set -a
-        source .env
-        set +a
-        mvn clean package 
+        while IFS= read -r line || [ -n "$line" ]; do
+          if [[ ! "$line" =~ ^# && "$line" =~ = ]]; then
+            export "$line"
+          fi
+        done < .env
+        mvn clean package
+
+    # 4.5 Troubleshoot: Print the exact exception causing the context failure if Step 4 fails
+    - name: Print True Test Error Exception
+      if: failure()
+      run: |
+        echo "===================================================="
+        echo "           PRINTING UNDERLYING ERROR                "
+        echo "===================================================="
+        cat target/surefire-reports/com.onlinebankingsystem.onlinebankingsystem.OnlineBankingSystemApplicationTests.txt || true
 
     # 5. Build and Tag Docker images using the dynamic registry string
     - name: Build Docker image
