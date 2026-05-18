@@ -66,17 +66,16 @@ jobs:
           GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
           GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
       run: |
-         git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/pod9project/kubernetes-manifest.git
-         
-         cd kubernetes-manifest
-         git config --global user.email "pod9project@gmail.com"
-         git config --global user.name "pod9project"
+         git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/Kryptcloud/bank-test-manifest.git
+         cd bank-test-manifest
+         git config --global user.email "fidelisadibe12@gmail.com"
+         git config --global user.name "kryptcloud"
 
-         sed -i "s+${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:.*+${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}+g" ./bank-project/backendapi.yaml
+         sed -i "s+${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:.*+${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}+g" ./bank-project/bank-backendkrypt.yaml
 
-         cat ./bank-project/backendapi.yaml | grep -q "${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
+         cat ./bank-project/bank-backendkrypt.yaml | grep -q "${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
 
-         git add bank-project/backendapi.yaml
-         git commit -m "Update backendapi image to version ${{ env.IMAGE_TAG }}"
-         git push origin main
+         git add bank-project/bank-backendkrypt.yaml
+         git commit -m "Update bank-backendkrypt image to version ${{ env.IMAGE_TAG }}"
+         git push origin krypt-cicd-backend
         
