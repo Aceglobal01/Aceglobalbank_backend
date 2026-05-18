@@ -3,7 +3,7 @@
 # on:
 #   push:
 #     branches:
-#       - main
+#       - test-cicd-backend
 #   # pull_request:
 #   #   branches:
 #   #     - cicd
@@ -13,7 +13,7 @@
 #     runs-on: ubuntu-latest
 #     env:
 #       ECR_REGISTRY: 845042113977.dkr.ecr.eu-north-1.amazonaws.com
-#       ECR_REPOSITORY: bank-backendapi
+#       ECR_REPOSITORY: backend-test
 #       AWS_REGION: eu-north-1
 #       IMAGE_TAG: ${{ github.run_number }}
 
@@ -27,8 +27,8 @@
 #     - name: Configure AWS credentials
 #       uses: aws-actions/configure-aws-credentials@v4
 #       with:
-#         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#         aws-access-key-id: ${{ secrets.AWS_TEST_ACCESS_KEY  }}
+#         aws-secret-access-key: ${{ secrets.AWS_TEST_ACCESS_KEY }}
 #         aws-region: ${{ env.AWS_REGION }}
 
 #     - name: Log in to Amazon ECR
@@ -80,7 +80,7 @@
 #          git commit -m "Update backendapi image to version ${{ env.IMAGE_TAG }}"
 #          git push origin main
         
-name: Build-Test-push
+name: Bank Backend Pipeline
 
 on:
   push:
@@ -88,63 +88,67 @@ on:
       - test-cicd-backend
 
 jobs:
-  build-test-and-push:
+  Continues-Integration_build_and_push:
     runs-on: ubuntu-latest
+    env:
+      ECR_REPOSITORY: backend-test
+      IMAGE_TAG: ${{ github.run_number }}
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      # Create .env file from GitHub Secret
-      - name: Create .env file
-        run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-      # Configure AWS Credentials
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_TEST_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_TEST_SECRETS_KEYS }}
-          aws-region: ${{ secrets.REGION }}
+    # 1. Create .env file from YOUR custom GitHub Secret
+    - name: Create .env file
+      run: |
+        echo "${{ secrets.MY_ENV_FILE }}" > .env
 
-      # Login to Amazon ECR
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+    # 2. Configure AWS credentials using YOUR specific new secret names
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.MY_AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.MY_AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.MY_AWS_REGION }}
 
-      # Build and test Spring Boot application
-      - name: Run Backend Integration Tests and Package
-        shell: bash
-        run: |
-          set -a
-          source .env
-          set +a
+    # 3. Log in to Amazon ECR (Dynamically captures the registry URI)
+    - name: Log in to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
 
-          echo "DB_HOST=$DB_HOST"
-          echo "DB_PORT=$DB_PORT"
-          echo "DB_NAME=$DB_NAME"
-          echo "DB_USERNAME=$DB_USERNAME"
+    # 4. Run Spring Boot application integration tests and package
+    - name: Run Backend Integration Tests and Package
+      shell: bash
+      run: |
+        set -a
+        source .env
+        set +a
+        mvn clean package
 
-          mvn clean package
+    # 5. Build and Tag Docker images (Working directory removed since Dockerfile is at root)
+    - name: Build Docker image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
+        docker tag $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:latest
+  
+    # 6. Push Docker images to ECR
+    - name: Push Docker images to ECR
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+        docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:latest
 
-      # Build Docker image
-      - name: Docker build
-        run: |
-          docker build -t backend-test:latest .
-
-      # Tag Docker image
-      - name: Docker tag
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker tag backend-test:latest $ECR_REGISTRY/backend-test:${{ github.run_number }}
-          docker tag backend-test:latest $ECR_REGISTRY/backend-test:latest
-
-      # Push Docker image to ECR
-      - name: Docker push
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker push $ECR_REGISTRY/backend-test:${{ github.run_number }}
-          docker push $ECR_REGISTRY/backend-test:latest
+    # 7. Clean up Docker images locally
+    - name: Clean up Docker images locally
+      if: always()
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: |
+        docker rmi $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} || true
+        docker rmi $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:latest || true

@@ -19,15 +19,16 @@
 # # Run the application
 # CMD ["java", "-jar", "target/online-banking-system-0.0.1-SNAPSHOT.jar"]
 # Use a lightweight OpenJDK runtime for the final container
+# Use an official, secure, and lightweight JRE image for production
 FROM eclipse-temurin:17-jre-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the compiled .jar file directly from the GitHub runner target directory
+# Copy ONLY the pre-built JAR file from the target directory into the container
 COPY target/online-banking-system-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose the port your Spring Boot app runs on
+# Expose the port your backend runs on (usually 8080)
 EXPOSE 8080
 
 # Run the application
