@@ -199,7 +199,7 @@ jobs:
         set -a
         source .env
         set +a
-        mvn clean package -DskipTests
+        mvn clean package 
 
     # 5. Build and Tag Docker images using the dynamic registry string
     - name: Build Docker image
