@@ -77,5 +77,5 @@ jobs:
 
          git add bank-project/bank-backendkrypt.yaml
          git commit -m "Update bank-backendkrypt image to version ${{ env.IMAGE_TAG }}"
-         git push origin krypt-cicd-backend
+         git push origin main
         
