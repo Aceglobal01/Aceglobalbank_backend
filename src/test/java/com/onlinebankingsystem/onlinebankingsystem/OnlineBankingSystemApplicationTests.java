@@ -1,19 +1,19 @@
-// package com.onlinebankingsystem.onlinebankingsystem;
-//
-// import org.junit.jupiter.api.Test;
-// import org.springframework.boot.test.context.SpringBootTest;
-//
-// @SpringBootTest
-// class OnlineBankingSystemApplicationTests {
-//
-// 	@Test
-// 	void contextLoads() {
-// 	}
-//
-// }
+//package com.onlinebankingsystem.onlinebankingsystem;
+
+//import org.junit.jupiter.api.Test;
+//import org.springframework.boot.test.context.SpringBootTest;
+
+//@SpringBootTest
+//class OnlineBankingSystemApplicationTests {
+
+	//@Test
+	//void contextLoads() {
+	//}
+
+//}
 
 
-package com.onlinebankingsystem.onlinebankingsystem;
+package com.onlinebankingsystem;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
