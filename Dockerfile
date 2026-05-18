@@ -14,7 +14,7 @@ COPY src /app/src
 RUN apk add --no-cache maven
 
 # Package the application using Maven
-RUN mvn clean package -DskipTests
+RUN mvn clean package
 
 # Run the application
 CMD ["java", "-jar", "target/online-banking-system-0.0.1-SNAPSHOT.jar"]
