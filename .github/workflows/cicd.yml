@@ -247,7 +247,7 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    # 1. Create .env file from YOUR custom GitHub Secret
+    # 1. Create .env file from YOUR custom GitHub Secret (Kept for Docker build context)
     - name: Create .env file
       run: |
         echo "${{ secrets.MY_ENV_FILE }}" > .env
@@ -265,15 +265,16 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    # 4. Run Spring Boot application integration tests and package safely
+    # 4. Inject variables explicitly to Maven to solve the 'Failed to determine a suitable driver class' error
     - name: Run Backend Integration Tests and Package
       shell: bash
+      env:
+        DB_HOST: online-banking-system.ctmii6seypis.eu-north-1.rds.amazonaws.com
+        DB_PORT: 3306
+        DB_NAME: online_banking
+        DB_USERNAME: admin
+        DB_PASSWORD: AceGlobalSecure2026 # Use your fresh updated password here
       run: |
-        while IFS= read -r line || [ -n "$line" ]; do
-          if [[ ! "$line" =~ ^# && "$line" =~ = ]]; then
-            export "$line"
-          fi
-        done < .env
         mvn clean package
 
     # 4.5 Troubleshoot: Print the exact exception causing the context failure if Step 4 fails
