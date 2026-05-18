@@ -12,7 +12,6 @@ jobs:
   Continuous-Integration_build_and_push:
     runs-on: ubuntu-latest
     env:
-      REGISTRY_NAME: ${{ secrets.REGISTRY_NAME }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: us-west-1
@@ -39,7 +38,7 @@ jobs:
       run: docker tag bank-app-backend:latest ${{ vars.ECR_REPO }}/bank-backendapi:${{ github.run_number }}
 
     - name: Push image to ECR
-      run: docker push ${{ vars.ECR_REPO }} :${{ github.run_number }}
+      run: docker push ${{ vars.ECR_REPO }}/bank-backendapi:${{ github.run_number }}
 
     - name: Clean up Docker image locally
       run: |
