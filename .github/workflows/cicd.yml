@@ -39,7 +39,7 @@ jobs:
       run: docker tag bank-app-backend:latest ${{ vars.ECR_REPO }}/bank-backendapi:${{ github.run_number }}
 
     - name: Push image to ECR
-      run: docker push ${{ vars.ECR_REPO }}/bank-backendapi:${{ github.run_number }}
+      run: docker push ${{ vars.ECR_REPO }} :${{ github.run_number }}
 
     - name: Clean up Docker image locally
       run: |
