@@ -36,7 +36,7 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v2
 
     - name: Build Docker image
-      working-directory: ./main_bank_app_backend
+      working-directory: .
       run: |
         docker build -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
         docker tag ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
