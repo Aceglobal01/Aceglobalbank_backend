@@ -43,7 +43,7 @@ jobs:
     - name: Clean up Docker image locally
       run: |
         docker rmi bank-app-backend:latest
-        docker rmi ${{ vars.ECR_REPO }}/bank-backendapi:${{ github.run_number }}
+        docker rmi ${{ vars.ECR_REPO }}:${{ github.run_number }}
 
     - name: Clean up GitHub repo on runner
       run: rm -rf .*
