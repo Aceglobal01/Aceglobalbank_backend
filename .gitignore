@@ -35,6 +35,6 @@ build/
 ### Ignore environment variables
 .env
 ### ignore application properties
-src/main/resources/application.properties
+##src/main/resources/application.properties
 backend-key
 
