@@ -63,7 +63,8 @@ spec:
     spec:
       containers:
       - name: bank-backend-container
-        image: 915742579450.dkr.ecr.us-west-1.amazonaws.com/bank-backendapi:43 # Replace this with your Docker image name
+        # Use the image that contains the CORS bean-name startup fix.
+        image: 915742579450.dkr.ecr.us-west-1.amazonaws.com/bank-backendapi:51
         ports:
         - containerPort: 8080 # Replace with your app's port if necessary
         env:

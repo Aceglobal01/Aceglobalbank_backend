@@ -69,7 +69,8 @@ public class WebConfig {
     private static final int CORS_FILTER_ORDER = -102;
 
     @Bean
-    public FilterRegistrationBean<CorsFilter> corsFilter() {
+    // Use a non-conflicting bean name so Spring Security does not treat this as a CorsFilter bean.
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistrationBean() {
 
         // Create CORS configuration object
         CorsConfiguration config = new CorsConfiguration();
