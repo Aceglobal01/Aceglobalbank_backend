@@ -52,16 +52,18 @@ metadata:
 spec:
   replicas: 1 # Adjust as necessary
   selector:
+    # Must match the pod labels below and the Service selector.
     matchLabels:
-      app: bank-backend-deployment
+      app: bank-backend
   template:
     metadata:
       labels:
-        app: bank-backend-deployment
+        # Keep this label aligned with the Service selector.
+        app: bank-backend
     spec:
       containers:
       - name: bank-backend-container
-        image: 915742579450.dkr.ecr.us-west-1.amazonaws.com/bank-backendapi:44 # Replace this with your Docker image name
+        image: 915742579450.dkr.ecr.us-west-1.amazonaws.com/bank-backendapi:43 # Replace this with your Docker image name
         ports:
         - containerPort: 8080 # Replace with your app's port if necessary
         env:

@@ -80,9 +80,8 @@ public class WebConfig {
         config.setAllowCredentials(true);
 
         // FIX 2:
-        // Explicitly allow your frontend domain
-        // IMPORTANT:
-        // When allowCredentials=true, you CANNOT use "*"
+        // Explicitly allow the real frontend domain used by this app.
+        // When allowCredentials=true, CORS must use an exact origin.
         config.setAllowedOrigins(Arrays.asList(
             "https://bank.aceglobalpod.online"
         ));

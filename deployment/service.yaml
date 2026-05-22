@@ -4,6 +4,7 @@ metadata:
   name: bank-backend-service
 spec:
   selector:
+    # Must match the Deployment pod label so the Service gets endpoints.
     app: bank-backend
   ports:
     - protocol: TCP

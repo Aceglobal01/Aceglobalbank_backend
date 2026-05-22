@@ -3,6 +3,7 @@ package com.onlinebankingsystem.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -41,7 +42,9 @@ public class SecurityConfig {
 		        .cors(cors -> cors.disable())
 		    
 				.authorizeHttpRequests(
-						auth -> auth.requestMatchers("/api/user/login", "/api/user/admin/register").permitAll()
+						// Allow browser preflight requests to reach the API.
+						auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+							.requestMatchers("/api/user/login", "/api/user/admin/register").permitAll()
 						
 						// this APIs are only accessible by ADMIN
 						.requestMatchers("/api/bank/register","/api/bank/fetch/all", "/api/bank/fetch/user",
