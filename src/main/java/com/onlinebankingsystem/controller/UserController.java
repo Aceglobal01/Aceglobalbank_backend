@@ -35,8 +35,8 @@ public class UserController {
 		return this.userResource.registerUser(request);
 	}
 	
-	// RegisterUserRequestDto, we will set only email, password & role from UI
-	@PostMapping("/admin/register")
+	// Keep method mapping relative to class mapping to avoid accidental double-slash paths.
+	@PostMapping("admin/register")
 	public ResponseEntity<CommonApiResponse> registerAdmin(@RequestBody RegisterUserRequestDto request) {
 		return userResource.registerAdmin(request);
 	}

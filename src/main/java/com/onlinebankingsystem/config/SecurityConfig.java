@@ -39,12 +39,16 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable())
-		        .cors(cors -> cors.disable())
-		    
+		        // Keep CORS enabled so cross-origin browser calls can pass preflight.
+		        .cors(cors -> {})
+				
 				.authorizeHttpRequests(
 						// Allow browser preflight requests to reach the API.
 						auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-							.requestMatchers("/api/user/login", "/api/user/admin/register").permitAll()
+							// Public auth endpoints must stay open.
+							.requestMatchers(HttpMethod.POST, "/api/user/login", "/api/user/admin/register").permitAll()
+							// Temporary compatibility for older route style that may include a double slash.
+							.requestMatchers(HttpMethod.POST, "/api/user//admin/register").permitAll()
 						
 						// this APIs are only accessible by ADMIN
 						.requestMatchers("/api/bank/register","/api/bank/fetch/all", "/api/bank/fetch/user",
